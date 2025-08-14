@@ -10,10 +10,10 @@ export const PromoBar = () => {
   return (
     <div className="bg-promo text-promo-foreground py-2 px-4 flex items-center justify-center relative animate-fade-in">
       <div className="flex items-center justify-center w-full space-x-2">
-        <span className="text-yellow-300">⚡ Limited-time offer!</span>
-        <span>Unlock a year of limitless creativity with all annual plans at 50% off.</span>
+        <span className="text-yellow-300">🚀 NEW:</span>
+        <span>AI-powered marketing campaigns that convert 3x better than traditional methods.</span>
         <button className="bg-white text-purple-700 px-4 py-1 rounded-md text-sm font-medium hover:bg-opacity-90 transition-all">
-          View Plan
+          Try Free
         </button>
       </div>
       <button 

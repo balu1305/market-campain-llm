@@ -1,228 +1,326 @@
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { PromoBar } from "../components/PromoBar";
 import { Sidebar } from "../components/Sidebar";
 import Header from "../components/Header";
-import { CreationCard } from "../components/CreationCard";
-import { QuickStartItem } from "../components/QuickStartItem";
-import { FeaturedAppCard } from "../components/FeaturedAppCard";
-import { ModelCard } from "../components/ModelCard";
-import { Video, Paintbrush, Grid, FileText, ArrowUpRight, ArrowRight, Search } from "lucide-react";
+import { Copy, Check, Mail, Share2, Image, ChevronDown } from "lucide-react";
+
+// Campaign data for different personas
+const campaignData = {
+  "Budget-Conscious Students": {
+    emailCampaign: {
+      subject: "🎓 Student Discounts Up to 70% Off - Limited Time!",
+      body: "Hey there, smart saver! 📚 We know every dollar counts when you're in school. That's why we've created exclusive student discounts just for you. Get up to 70% off on study essentials, tech gadgets, and more. Use code STUDENT70 at checkout. Valid student ID required. Offer expires in 48 hours!",
+      qualityScore: 89
+    },
+    socialMedia: {
+      posts: [
+        {
+          platform: "Instagram",
+          content: "📚✨ Broke but make it academic? We got you! Student discount = more money for ramen 🍜 #StudentLife #BudgetFriendly #Study",
+          qualityScore: 92
+        },
+        {
+          platform: "TikTok", 
+          content: "POV: You're a student but still want nice things 💅 Our student discounts said 'say less' 🎓 #StudentDeals #BudgetHacks",
+          qualityScore: 88
+        }
+      ]
+    },
+    adVisuals: [
+      {
+        url: "/lovable-uploads/12cd0679-f352-498e-a6ad-9faaa1ffbec9.png",
+        title: "Student Budget Hero",
+        qualityScore: 85
+      },
+      {
+        url: "/lovable-uploads/142dea30-a410-4e79-84d0-70189e8fcd07.png", 
+        title: "Campus Savings",
+        qualityScore: 91
+      }
+    ]
+  },
+  "Luxury Tech Enthusiasts": {
+    emailCampaign: {
+      subject: "Exclusive Preview: The Future of Premium Technology",
+      body: "Dear Technology Connoisseur, You're among the first to experience our latest premium collection. Crafted with aerospace-grade materials and cutting-edge innovation, these pieces represent the pinnacle of technological excellence. Limited to 500 units worldwide. Priority access expires in 72 hours.",
+      qualityScore: 94
+    },
+    socialMedia: {
+      posts: [
+        {
+          platform: "LinkedIn",
+          content: "Innovation meets luxury. Our latest collection redefines what's possible in premium technology. #Innovation #LuxuryTech #Premium",
+          qualityScore: 96
+        },
+        {
+          platform: "Instagram",
+          content: "When technology becomes art 🎨 Limited edition. Unlimited possibilities. ✨ #LuxuryTech #Innovation #Exclusive",
+          qualityScore: 93
+        }
+      ]
+    },
+    adVisuals: [
+      {
+        url: "/lovable-uploads/22f4141e-f83e-4b85-8c93-672e181d999b.png",
+        title: "Premium Tech Showcase",
+        qualityScore: 97
+      },
+      {
+        url: "/lovable-uploads/e9db2be9-f0a3-4506-b387-ce20bea67ba9.png",
+        title: "Luxury Innovation",
+        qualityScore: 94
+      }
+    ]
+  },
+  "Eco-Friendly Families": {
+    emailCampaign: {
+      subject: "🌱 Creating a Greener Tomorrow, Together as a Family",
+      body: "Hi Green Family! 🌍 Teaching kids about sustainability while keeping life convenient? We're here to help! Our eco-friendly family products are safe, sustainable, and kid-approved. From biodegradable lunch boxes to solar-powered toys, we make going green fun for the whole family. Plus, every purchase plants a tree! 🌳",
+      qualityScore: 91
+    },
+    socialMedia: {
+      posts: [
+        {
+          platform: "Facebook",
+          content: "Teaching little ones big lessons about our planet 🌱 Every small choice makes a big difference for their future 💚 #EcoFamily #SustainableLiving #FutureEarth",
+          qualityScore: 89
+        },
+        {
+          platform: "Instagram",
+          content: "Raising tomorrow's earth heroes 🌍👶 Sustainable choices that don't compromise on fun! #EcoKids #GreenFamily #SustainableParenting",
+          qualityScore: 92
+        }
+      ]
+    },
+    adVisuals: [
+      {
+        url: "/lovable-uploads/4255fa40-8036-4424-a210-e3bcd99754df.png",
+        title: "Green Family Living",
+        qualityScore: 88
+      },
+      {
+        url: "/lovable-uploads/b67f802d-430a-4e5a-8755-b61e10470d58.png",
+        title: "Eco-Friendly Kids",
+        qualityScore: 90
+      }
+    ]
+  }
+};
+
+type Persona = keyof typeof campaignData;
+type Tab = "Email Campaign" | "Social Media" | "Ad Visuals";
 
 const Index = () => {
-  // Add a handler to add the logo.svg file if it's missing
-  useEffect(() => {
-    // Check if the logo exists, if not create a simple one
-    const checkLogo = async () => {
-      try {
-        const response = await fetch('/logo.svg');
-        if (response.status === 404) {
-          console.log('Logo not found, would create one in a real app');
-        }
-      } catch (error) {
-        console.log('Error checking logo:', error);
-      }
-    };
-    
-    checkLogo();
-  }, []);
+  const [selectedPersona, setSelectedPersona] = useState<Persona>("Budget-Conscious Students");
+  const [activeTab, setActiveTab] = useState<Tab>("Email Campaign");
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string, identifier: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedText(identifier);
+      setTimeout(() => setCopiedText(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const getQualityScoreColor = (score: number) => {
+    if (score >= 90) return "text-green-500";
+    if (score >= 75) return "text-yellow-500";
+    return "text-red-500";
+  };
+
+  const currentData = campaignData[selectedPersona];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col dark">
       <PromoBar />
       <div className="flex flex-1">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Header />
           <div className="flex-1 overflow-auto">
-            <main className="py-8 px-12">
-              <h1 className="text-3xl font-bold text-white mb-8">
-                What would you like to create?
-              </h1>
-              
-              <div className="grid grid-cols-2 gap-6 mb-12">
-                <CreationCard type="image" />
-                <CreationCard type="storytelling" />
+            <main className="py-8 px-12 bg-[#0A0A0A] text-white">
+              {/* Top Bar Controls */}
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold">
+                  AI Marketing Campaign Generator
+                </h1>
+                
+                <div className="flex items-center gap-4">
+                  {/* Persona Selector */}
+                  <div className="relative">
+                    <select 
+                      value={selectedPersona}
+                      onChange={(e) => setSelectedPersona(e.target.value as Persona)}
+                      className="appearance-none px-4 py-2 pr-8 rounded-lg border bg-[#1A1A1A] border-gray-700 text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Object.keys(campaignData).map((persona) => (
+                        <option key={persona} value={persona}>
+                          {persona}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" />
+                  </div>
+                </div>
               </div>
-              
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Quick starts
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#3A3600] mr-4 flex items-center justify-center">
-                      <Video size={24} className="text-[#FFD426]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-white">Image to Video</h3>
-                        <span className="bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">
-                          New
-                        </span>
+
+              {/* Tabbed Interface */}
+              <div className="mb-6">
+                <div className="flex space-x-1 mb-6">
+                  {(["Email Campaign", "Social Media", "Ad Visuals"] as Tab[]).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                        activeTab === tab
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-[#1A1A1A] text-gray-400 hover:bg-gray-800 hover:text-white'
+                      }`}
+                    >
+                      {tab === "Email Campaign" && <Mail className="inline w-4 h-4 mr-2" />}
+                      {tab === "Social Media" && <Share2 className="inline w-4 h-4 mr-2" />}
+                      {tab === "Ad Visuals" && <Image className="inline w-4 h-4 mr-2" />}
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Content Display */}
+                <div className="space-y-6">
+                  {activeTab === "Email Campaign" && (
+                    <div className="space-y-4">
+                      {/* Email Subject */}
+                      <div className="p-6 rounded-lg border bg-[#1A1A1A] border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-lg font-semibold">Email Subject</h3>
+                          <button
+                            onClick={() => copyToClipboard(currentData.emailCampaign.subject, 'email-subject')}
+                            className={`flex items-center gap-2 px-3 py-1 rounded text-sm transition-colors ${
+                              copiedText === 'email-subject'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                            }`}
+                          >
+                            {copiedText === 'email-subject' ? (
+                              <>
+                                <Check size={14} />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={14} />
+                                Copy
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-300">
+                          {currentData.emailCampaign.subject}
+                        </p>
+                        <div className="mt-2">
+                          <span className={`text-sm font-medium ${getQualityScoreColor(currentData.emailCampaign.qualityScore)}`}>
+                            Quality Score: {currentData.emailCampaign.qualityScore}%
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-400 mt-1">Bring your image to life</p>
+
+                      {/* Email Body */}
+                      <div className="p-6 rounded-lg border bg-[#1A1A1A] border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-lg font-semibold">Email Body</h3>
+                          <button
+                            onClick={() => copyToClipboard(currentData.emailCampaign.body, 'email-body')}
+                            className={`flex items-center gap-2 px-3 py-1 rounded text-sm transition-colors ${
+                              copiedText === 'email-body'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                            }`}
+                          >
+                            {copiedText === 'email-body' ? (
+                              <>
+                                <Check size={14} />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={14} />
+                                Copy
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-300">
+                          {currentData.emailCampaign.body}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#00361F] mr-4 flex items-center justify-center">
-                      <Paintbrush size={24} className="text-[#00A67E]" />
+                  )}
+
+                  {activeTab === "Social Media" && (
+                    <div className="space-y-4">
+                      {currentData.socialMedia.posts.map((post, index) => (
+                        <div key={index} className="p-6 rounded-lg border bg-[#1A1A1A] border-gray-700">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-lg font-semibold">{post.platform} Post</h3>
+                            <button
+                              onClick={() => copyToClipboard(post.content, `social-${index}`)}
+                              className={`flex items-center gap-2 px-3 py-1 rounded text-sm transition-colors ${
+                                copiedText === `social-${index}`
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                              }`}
+                            >
+                              {copiedText === `social-${index}` ? (
+                                <>
+                                  <Check size={14} />
+                                  Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={14} />
+                                  Copy
+                                </>
+                              )}
+                            </button>
+                          </div>
+                          <p className="text-sm text-gray-300 mb-2">
+                            {post.content}
+                          </p>
+                          <div>
+                            <span className={`text-sm font-medium ${getQualityScoreColor(post.qualityScore)}`}>
+                              Quality Score: {post.qualityScore}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <h3 className="font-medium text-white">Choose a Style</h3>
-                      <p className="text-sm text-gray-400 mt-1">Start with a style you like</p>
+                  )}
+
+                  {activeTab === "Ad Visuals" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {currentData.adVisuals.map((visual, index) => (
+                        <div key={index} className="p-6 rounded-lg border bg-[#1A1A1A] border-gray-700">
+                          <img 
+                            src={visual.url} 
+                            alt={visual.title}
+                            className="w-full h-48 object-cover rounded-lg mb-4"
+                          />
+                          <h3 className="text-lg font-semibold mb-2">{visual.title}</h3>
+                          <div>
+                            <span className={`text-sm font-medium ${getQualityScoreColor(visual.qualityScore)}`}>
+                              Quality Score: {visual.qualityScore}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#360036] mr-4 flex items-center justify-center">
-                      <Grid size={24} className="text-[#FF3EA5]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">Explore Models</h3>
-                      <p className="text-sm text-gray-400 mt-1">See 100+ Fine-tuned models</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#36003B] mr-4 flex items-center justify-center">
-                      <FileText size={24} className="text-[#FF3EA5]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">Train Model</h3>
-                      <p className="text-sm text-gray-400 mt-1">Customize your creativity</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#3A3600] mr-4 flex items-center justify-center">
-                      <Search size={24} className="text-[#FFD426]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">Ultimate Upscale</h3>
-                      <p className="text-sm text-gray-400 mt-1">Upscale your images</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 flex items-start">
-                    <div className="p-3 rounded-lg bg-[#003619] mr-4 flex items-center justify-center">
-                      <FileText size={24} className="text-[#00A67E]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">Image to Prompt</h3>
-                      <p className="text-sm text-gray-400 mt-1">Convert image to text prompt</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </section>
-              
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Featured Apps
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <FeaturedAppCard 
-                    title="Image to Video"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/12cd0679-f352-498e-a6ad-9faaa1ffbec9.png"
-                    isNew
-                  />
-                  <FeaturedAppCard 
-                    title="Ultimate Upscale"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/d16f3783-6af1-4327-8936-c5a50eb0cab5.png"
-                  />
-                  <FeaturedAppCard 
-                    title="AI Filters"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/142dea30-a410-4e79-84d0-70189e8fcd07.png"
-                  />
-                  <FeaturedAppCard 
-                    title="Sketch to image"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/b67f802d-430a-4e5a-8755-b61e10470d58.png"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                  <FeaturedAppCard 
-                    title="Blend Board"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/4255fa40-8036-4424-a210-e3bcd99754df.png"
-                  />
-                  <FeaturedAppCard 
-                    title="Change Facial Expression"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/0c6db754-b805-46e5-a4b8-319a9d8fef71.png"
-                  />
-                  <FeaturedAppCard 
-                    title="Expand"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/8827d443-a68b-4bd9-998f-3c4c410510e9.png"
-                  />
-                  <FeaturedAppCard 
-                    title="Remove background"
-                    subtitle="By OpenArt"
-                    imageSrc="/lovable-uploads/b89881e6-12b4-4527-9c22-1052b8116ca9.png"
-                  />
-                </div>
-                
-                <div className="flex justify-center mt-8">
-                  <button className="border border-gray-700 hover:bg-gray-800 transition-colors text-white flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium">
-                    View All Flow Apps
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </section>
-              
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Start from a model
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <ModelCard 
-                    title="Train your own model"
-                    subtitle="Customize your creativity"
-                    imageSrc=""
-                    isTrainYourOwn={true}
-                  />
-                  <ModelCard 
-                    title="OpenArt SDXL"
-                    subtitle="OpenArt"
-                    imageSrc="/lovable-uploads/22f4141e-f83e-4b85-8c93-672e181d999b.png"
-                    tags={[
-                      { label: 'SDXL', variant: 'blue' },
-                      { label: 'Standard', variant: 'green' }
-                    ]}
-                  />
-                  <ModelCard 
-                    title="Flux (dev)"
-                    subtitle="Flux_dev"
-                    imageSrc="/lovable-uploads/e9db2be9-f0a3-4506-b387-ce20bea67ba9.png"
-                    tags={[
-                      { label: 'Flux', variant: 'orange' },
-                      { label: 'Standard', variant: 'green' }
-                    ]}
-                  />
-                  <ModelCard 
-                    title="Flux Realism"
-                    subtitle="Flux_Realism"
-                    imageSrc="/lovable-uploads/e565a3ea-dc96-4344-a533-62026d4245e1.png"
-                    tags={[
-                      { label: 'Flux', variant: 'orange' },
-                      { label: 'Photorealistic', variant: 'yellow' }
-                    ]}
-                  />
-                </div>
-                
-                <div className="flex justify-center mt-8">
-                  <button className="border border-gray-700 hover:bg-gray-800 transition-colors text-white flex items-center gap-2 rounded-md px-6 py-2 text-sm font-medium">
-                    View All Models
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </section>
+              </div>
             </main>
           </div>
         </div>

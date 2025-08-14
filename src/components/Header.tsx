@@ -45,10 +45,10 @@ const Header = () => {
           Upgrade
         </button>
         
-        {/* Create button */}
+        {/* Create Campaign button */}
         <button className="transition-colors text-white flex items-center gap-1 rounded-md px-4 py-1.5 text-sm font-medium bg-blue-700 hover:bg-blue-600">
           <Plus size={16} />
-          Create
+          Generate Campaign
         </button>
         
         {/* Sign In button */}

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { ChevronRight, HomeIcon, Users, Video, Image, Edit, Palette, Grid, LayoutGrid, Rss, Code, ChevronDown, BookOpen, HelpCircle, Sparkles, Palette as ThemeIcon, Newspaper, Clock, Bookmark, Heart, Album, Boxes } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ChevronRight, HomeIcon, Users, Target, Mail, Share2, BarChart3, Edit, TrendingUp, Grid, LayoutGrid, Rss, Code, ChevronDown, BookOpen, HelpCircle, Sparkles, Palette as ThemeIcon, Newspaper, Clock, Bookmark, Heart, Album, Boxes } from "lucide-react";
 
 type SidebarItemProps = {
   icon: React.ReactNode;
@@ -49,11 +50,33 @@ const DropdownItem = ({ icon, label, isExternal = false, isActive = false, onCli
 );
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [myStuffOpen, setMyStuffOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState("Home");
   const [activeDropdownItem, setActiveDropdownItem] = useState("");
+
+  const getActiveItem = () => {
+    const path = location.pathname;
+    if (path === "/" || path === "/dashboard") return "Dashboard";
+    if (path === "/personas") return "Target Personas";
+    if (path === "/campaign-builder") return "Campaign Builder";
+    if (path === "/email-campaigns") return "Email Campaigns";
+    if (path === "/social-media") return "Social Media";
+    if (path === "/analytics") return "Analytics";
+    if (path === "/content-editor") return "Content Editor";
+    if (path === "/performance") return "Performance";
+    if (path === "/templates") return "Templates";
+    if (path === "/ab-tests") return "A/B Tests";
+    if (path === "/my-campaigns") return "My Campaigns";
+    if (path === "/resources") return "Resources";
+    return "Dashboard";
+  };
+
+  const handleNavigation = (item, path) => {
+    navigate(path);
+  };
 
   if (isCollapsed) {
     return (
@@ -76,7 +99,7 @@ export const Sidebar = () => {
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
         <div className="flex items-center gap-2">
           <img src="/lovable-uploads/407e5ec8-9b67-42ee-acf0-b238e194aa64.png" alt="Logo" className="w-8 h-8" />
-          <span className="text-white font-semibold">OpenArt</span>
+          <span className="text-white font-semibold">MarketingAI</span>
         </div>
         <button
           onClick={() => setIsCollapsed(true)}
@@ -89,64 +112,64 @@ export const Sidebar = () => {
       <div className="py-2 px-3 flex flex-col gap-1">
         <SidebarItem 
           icon={<HomeIcon size={20} />} 
-          label="Home" 
-          isActive={activeItem === "Home"}
-          onClick={() => setActiveItem("Home")}
+          label="Dashboard" 
+          isActive={getActiveItem() === "Dashboard"}
+          onClick={() => handleNavigation("Dashboard", "/dashboard")}
         />
         <SidebarItem 
           icon={<Users size={20} />} 
-          label="Characters" 
+          label="Target Personas" 
+          isActive={getActiveItem() === "Target Personas"}
+          onClick={() => handleNavigation("Target Personas", "/personas")}
+        />
+        <SidebarItem 
+          icon={<Target size={20} />} 
+          label="Campaign Builder" 
           isNew 
-          isActive={activeItem === "Characters"}
-          onClick={() => setActiveItem("Characters")}
+          isActive={getActiveItem() === "Campaign Builder"}
+          onClick={() => handleNavigation("Campaign Builder", "/campaign-builder")}
         />
         <SidebarItem 
-          icon={<Video size={20} />} 
-          label="Videos" 
-          isActive={activeItem === "Videos"}
-          onClick={() => setActiveItem("Videos")}
+          icon={<Mail size={20} />} 
+          label="Email Campaigns" 
+          isActive={getActiveItem() === "Email Campaigns"}
+          onClick={() => handleNavigation("Email Campaigns", "/email-campaigns")}
         />
         <SidebarItem 
-          icon={<Image size={20} />} 
-          label="Create Image" 
-          isActive={activeItem === "Create Image"}
-          onClick={() => setActiveItem("Create Image")}
+          icon={<Share2 size={20} />} 
+          label="Social Media" 
+          isActive={getActiveItem() === "Social Media"}
+          onClick={() => handleNavigation("Social Media", "/social-media")}
+        />
+        <SidebarItem 
+          icon={<BarChart3 size={20} />} 
+          label="Analytics" 
+          isActive={getActiveItem() === "Analytics"}
+          onClick={() => handleNavigation("Analytics", "/analytics")}
         />
         <SidebarItem 
           icon={<Edit size={20} />} 
-          label="Edit Image" 
-          isActive={activeItem === "Edit Image"}
-          onClick={() => setActiveItem("Edit Image")}
+          label="Content Editor" 
+          isActive={getActiveItem() === "Content Editor"}
+          onClick={() => handleNavigation("Content Editor", "/content-editor")}
         />
         <SidebarItem 
-          icon={<Palette size={20} />} 
-          label="Style Palettes" 
-          isActive={activeItem === "Style Palettes"}
-          onClick={() => setActiveItem("Style Palettes")}
+          icon={<TrendingUp size={20} />} 
+          label="Performance" 
+          isActive={getActiveItem() === "Performance"}
+          onClick={() => handleNavigation("Performance", "/performance")}
         />
         <SidebarItem 
           icon={<Grid size={20} />} 
-          label="Models" 
-          isActive={activeItem === "Models"}
-          onClick={() => setActiveItem("Models")}
+          label="Templates" 
+          isActive={getActiveItem() === "Templates"}
+          onClick={() => handleNavigation("Templates", "/templates")}
         />
         <SidebarItem 
           icon={<LayoutGrid size={20} />} 
-          label="Apps" 
-          isActive={activeItem === "Apps"}
-          onClick={() => setActiveItem("Apps")}
-        />
-        <SidebarItem 
-          icon={<Rss size={20} />} 
-          label="Community Feed" 
-          isActive={activeItem === "Community Feed"}
-          onClick={() => setActiveItem("Community Feed")}
-        />
-        <SidebarItem 
-          icon={<Code size={20} />} 
-          label="ComfyUI Workflows" 
-          isActive={activeItem === "ComfyUI Workflows"}
-          onClick={() => setActiveItem("ComfyUI Workflows")}
+          label="A/B Tests" 
+          isActive={getActiveItem() === "A/B Tests"}
+          onClick={() => handleNavigation("A/B Tests", "/ab-tests")}
         />
       </div>
 
@@ -154,12 +177,12 @@ export const Sidebar = () => {
         <div className="py-2 px-3">
           <SidebarItem 
             icon={myStuffOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            label="My stuff" 
-            isActive={activeItem === "My stuff"}
+            label="My Campaigns" 
+            isActive={getActiveItem() === "My Campaigns"}
             hasDropdown
             onClick={() => {
               setMyStuffOpen(!myStuffOpen);
-              setActiveItem("My stuff");
+              handleNavigation("My Campaigns", "/my-campaigns");
             }}
           />
 
@@ -167,33 +190,33 @@ export const Sidebar = () => {
             <div className="mt-1 space-y-1 animate-fade-in">
               <DropdownItem 
                 icon={<Clock size={16} />} 
-                label="Creation History" 
-                isActive={activeDropdownItem === "Creation History"}
-                onClick={() => setActiveDropdownItem("Creation History")}
+                label="Campaign History" 
+                isActive={activeDropdownItem === "Campaign History"}
+                onClick={() => setActiveDropdownItem("Campaign History")}
               />
               <DropdownItem 
                 icon={<Bookmark size={16} />} 
-                label="Bookmarks" 
-                isActive={activeDropdownItem === "Bookmarks"}
-                onClick={() => setActiveDropdownItem("Bookmarks")}
+                label="Saved Templates" 
+                isActive={activeDropdownItem === "Saved Templates"}
+                onClick={() => setActiveDropdownItem("Saved Templates")}
               />
               <DropdownItem 
                 icon={<Heart size={16} />} 
-                label="Liked" 
-                isActive={activeDropdownItem === "Liked"}
-                onClick={() => setActiveDropdownItem("Liked")}
+                label="Favorites" 
+                isActive={activeDropdownItem === "Favorites"}
+                onClick={() => setActiveDropdownItem("Favorites")}
               />
               <DropdownItem 
                 icon={<Album size={16} />} 
-                label="Saved Albums" 
-                isActive={activeDropdownItem === "Saved Albums"}
-                onClick={() => setActiveDropdownItem("Saved Albums")}
+                label="Brand Assets" 
+                isActive={activeDropdownItem === "Brand Assets"}
+                onClick={() => setActiveDropdownItem("Brand Assets")}
               />
               <DropdownItem 
                 icon={<Boxes size={16} />} 
-                label="Trained Models" 
-                isActive={activeDropdownItem === "Trained Models"}
-                onClick={() => setActiveDropdownItem("Trained Models")}
+                label="Custom Personas" 
+                isActive={activeDropdownItem === "Custom Personas"}
+                onClick={() => setActiveDropdownItem("Custom Personas")}
               />
             </div>
           )}
@@ -204,10 +227,10 @@ export const Sidebar = () => {
             icon={resourcesOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             label="Resources" 
             hasDropdown
-            isActive={activeItem === "Resources"}
+            isActive={getActiveItem() === "Resources"}
             onClick={() => {
               setResourcesOpen(!resourcesOpen);
-              setActiveItem("Resources");
+              handleNavigation("Resources", "/resources");
             }}
           />
           

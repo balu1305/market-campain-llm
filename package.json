@@ -1,7 +1,8 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "ai-marketing-campaign-generator",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "AI-powered marketing campaign generator with persona-driven content creation",
   "type": "module",
   "scripts": {
     "dev": "vite",
