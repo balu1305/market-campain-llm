@@ -5,6 +5,7 @@ A sophisticated web application that generates AI-powered marketing campaigns ta
 ## 🚀 Features
 
 ### Core Functionality
+
 - **Persona-Driven Campaigns**: Generate campaigns for "Budget-Conscious Students," "Luxury Tech Enthusiasts," and "Eco-Friendly Families"
 - **Multi-Channel Content**: Create email campaigns, social media posts, and ad visuals
 - **Quality Scoring**: AI-powered quality scores for each piece of content
@@ -12,6 +13,7 @@ A sophisticated web application that generates AI-powered marketing campaigns ta
 - **Dark/Light Mode**: Toggle between themes for comfortable viewing
 
 ### User Interface
+
 - **Tabbed Navigation**: Organized content display across Email Campaign, Social Media, and Ad Visuals tabs
 - **Interactive Sidebar**: Marketing-focused navigation with campaign management tools
 - **Responsive Design**: Works seamlessly across desktop and mobile devices
@@ -20,16 +22,19 @@ A sophisticated web application that generates AI-powered marketing campaigns ta
 ### Campaign Content Types
 
 #### Email Campaigns
+
 - Subject line optimization
 - Personalized email body content
 - Quality scoring for effectiveness
 
 #### Social Media
+
 - Platform-specific content (Instagram, Facebook, LinkedIn, TikTok)
 - Hashtag optimization
 - Engagement-focused messaging
 
 #### Ad Visuals
+
 - AI-generated visual concepts
 - Quality assessment scores
 - Platform-optimized formats
@@ -46,17 +51,20 @@ A sophisticated web application that generates AI-powered marketing campaigns ta
 ## 📦 Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/balu1305/market-campain-llm.git
 cd market-campain-llm
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -66,32 +74,38 @@ npm run dev
 ## 🎯 Usage
 
 ### Selecting a Persona
+
 1. Use the dropdown in the top bar to select your target audience
 2. Choose from pre-defined personas or create custom ones
 
 ### Generating Content
+
 1. Navigate through the tabs (Email Campaign, Social Media, Ad Visuals)
 2. Review AI-generated content for your selected persona
 3. Use the "Copy" button to copy content to your clipboard
 4. Check quality scores to optimize your campaigns
 
 ### Theme Customization
+
 - Toggle between dark and light modes using the theme button
 - Interface adapts automatically for optimal viewing
 
 ## 📊 Campaign Personas
 
 ### Budget-Conscious Students
+
 - Focus on affordability and value
 - Casual, relatable messaging
 - Student discount emphasis
 
 ### Luxury Tech Enthusiasts
+
 - Premium positioning and exclusivity
 - Professional, sophisticated tone
 - Innovation and quality focus
 
 ### Eco-Friendly Families
+
 - Sustainability and family values
 - Warm, community-focused messaging
 - Environmental impact emphasis
@@ -99,6 +113,7 @@ npm run dev
 ## 🎨 Design System
 
 The application uses a comprehensive design system with:
+
 - Consistent color palette for light and dark modes
 - Typography hierarchy for content organization
 - Interactive states and animations
@@ -107,12 +122,14 @@ The application uses a comprehensive design system with:
 ## 🔧 Development
 
 ### Available Scripts
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
 ### Project Structure
+
 ```
 src/
 ├── components/          # Reusable UI components
@@ -131,6 +148,7 @@ src/
 ## 🚀 Deployment
 
 Build the project for production:
+
 ```bash
 npm run build
 ```
