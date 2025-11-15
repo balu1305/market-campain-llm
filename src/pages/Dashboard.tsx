@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart3,
   Users,
@@ -11,46 +11,61 @@ import {
   DollarSign,
   Calendar,
 } from "lucide-react";
+import { useCampaignStats, useDashboardCampaigns } from '../hooks/useCampaigns.jsx';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState("7d");
+  const { user } = useAuth();
+  const { stats, isLoading: statsLoading, error: statsError } = useCampaignStats();
+  const { campaigns: recentCampaigns, isLoading: campaignsLoading } = useDashboardCampaigns();
 
-  const stats = [
+  // Transform API stats to match UI format
+  const transformedStats = stats ? [
     {
       title: "Active Campaigns",
-      value: "12",
-      change: "+2.5%",
+      value: stats.activeCampaigns?.toString() || "0",
+      change: "+2.5%", // This could come from API comparison
       trend: "up",
       icon: <Target className="w-6 h-6 text-blue-500" />,
     },
     {
-      title: "Total Reach",
-      value: "847K",
+      title: "Total Campaigns", 
+      value: stats.totalCampaigns?.toString() || "0",
       change: "+18.2%",
       trend: "up",
       icon: <Eye className="w-6 h-6 text-green-500" />,
     },
     {
-      title: "Click-through Rate",
-      value: "3.2%",
+      title: "Content Generated",
+      value: stats.contentGenerated?.toString() || "0",
       change: "+0.8%",
       trend: "up",
       icon: <MousePointer className="w-6 h-6 text-purple-500" />,
     },
     {
-      title: "Revenue Generated",
-      value: "$24,500",
+      title: "Average Budget",
+      value: stats.averageBudget ? `$${stats.averageBudget.toLocaleString()}` : "$0",
       change: "+12.4%",
       trend: "up",
       icon: <DollarSign className="w-6 h-6 text-yellow-500" />,
     },
-  ];
+  ] : [];
 
-  const recentCampaigns = [
+  // Transform recent campaigns from API or use fallback
+  const displayCampaigns = recentCampaigns.length > 0 ? recentCampaigns.map(campaign => ({
+    id: campaign.id,
+    name: campaign.name,
+    persona: campaign.persona?.name || 'Unknown Persona',
+    status: campaign.status,
+    performance: "High", // This could be calculated from campaign metrics
+    reach: "N/A", // This would come from campaign analytics
+    ctr: "N/A", // This would come from campaign analytics
+  })) : [
     {
       id: 1,
       name: "Student Summer Sale",
-      persona: "Budget-Conscious Students",
+      persona: "Budget-Conscious Students", 
       status: "Active",
       performance: "High",
       reach: "45K",
@@ -60,7 +75,7 @@ const Dashboard = () => {
       id: 2,
       name: "Luxury Tech Launch",
       persona: "Luxury Tech Enthusiasts",
-      status: "Active",
+      status: "Active", 
       performance: "Medium",
       reach: "12K",
       ctr: "2.8%",
@@ -123,29 +138,47 @@ const Dashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-[#1A1A1A] rounded-lg p-6 border border-gray-800"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">{stat.title}</p>
-                  <p className="text-2xl font-bold text-white mt-1">
-                    {stat.value}
-                  </p>
-                  <p
-                    className={`text-sm mt-1 ${
-                      stat.trend === "up" ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {stat.change} from last period
-                  </p>
-                </div>
-                <div className="bg-gray-800 p-3 rounded-lg">{stat.icon}</div>
+          {statsLoading ? (
+            // Loading state
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-[#1A1A1A] rounded-lg p-6 border border-gray-800 animate-pulse"
+              >
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-700 rounded w-1/3"></div>
               </div>
+            ))
+          ) : statsError ? (
+            <div className="col-span-full text-red-500 text-center py-4">
+              Error loading stats: {statsError}
             </div>
-          ))}
+          ) : (
+            transformedStats.map((stat, index) => (
+              <div
+                key={index}
+                className="bg-[#1A1A1A] rounded-lg p-6 border border-gray-800"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">{stat.title}</p>
+                    <p className="text-2xl font-bold text-white mt-1">
+                      {stat.value}
+                    </p>
+                    <p
+                      className={`text-sm mt-1 ${ 
+                        stat.trend === "up" ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {stat.change} from last period
+                    </p>
+                  </div>
+                  <div className="bg-gray-800 p-3 rounded-lg">{stat.icon}</div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Main Content Grid */}
@@ -158,13 +191,24 @@ const Dashboard = () => {
               </h3>
             </div>
             <div className="p-6">
-              <div className="space-y-4">
-                {recentCampaigns.map((campaign) => (
-                  <div
-                    key={campaign.id}
-                    className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
-                  >
-                    <div className="flex-1">
+              {campaignsLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="p-4 bg-gray-800 rounded-lg animate-pulse">
+                      <div className="h-4 bg-gray-700 rounded w-1/3 mb-2"></div>
+                      <div className="h-3 bg-gray-700 rounded w-1/4 mb-2"></div>
+                      <div className="h-3 bg-gray-700 rounded w-1/6"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {displayCampaigns.map((campaign) => (
+                    <div
+                      key={campaign.id}
+                      className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex-1">
                       <h4 className="font-medium text-white">
                         {campaign.name}
                       </h4>
@@ -189,7 +233,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 

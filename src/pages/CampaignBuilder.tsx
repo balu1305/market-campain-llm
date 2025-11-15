@@ -13,14 +13,24 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
+import { usePersonas } from '../hooks/usePersonas.jsx';
+import { useCampaigns } from '../hooks/useCampaigns.jsx';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 const CampaignBuilder = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const { personas, isLoading: personasLoading } = usePersonas();
+  const { createCampaign } = useCampaigns();
+  
   const [campaignData, setCampaignData] = useState({
     name: "",
+    description: "",
     objective: "",
-    persona: "",
+    personaId: "", // Changed from persona to personaId
     budget: "",
+    currency: "USD",
     startDate: "",
     endDate: "",
     channels: [],
@@ -68,7 +78,13 @@ const CampaignBuilder = () => {
     },
   ];
 
-  const personas = [
+  // Use API personas or fallback to hardcoded ones
+  const personaOptions = personas.length > 0 ? personas.map(p => ({
+    id: p.id,
+    label: p.name,
+    avatar: "👤", // Could be customized based on persona
+    description: p.description
+  })) : [
     { id: "students", label: "Budget-Conscious Students", avatar: "🎓" },
     { id: "luxury", label: "Luxury Tech Enthusiasts", avatar: "💎" },
     { id: "families", label: "Eco-Friendly Families", avatar: "🌱" },
@@ -121,6 +137,59 @@ const CampaignBuilder = () => {
         ? prev[field].filter((item) => item !== value)
         : [...prev[field], value],
     }));
+  };
+
+  const handleSubmitCampaign = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // Validate required fields
+      if (!campaignData.name || !campaignData.objective || !campaignData.personaId) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Prepare campaign data for API
+      const campaignPayload = {
+        name: campaignData.name,
+        description: campaignData.description,
+        objective: campaignData.objective,
+        personaId: campaignData.personaId,
+        budget: parseFloat(campaignData.budget) || 0,
+        currency: campaignData.currency,
+        startDate: campaignData.startDate,
+        endDate: campaignData.endDate,
+        tone: campaignData.tone,
+        keywords: campaignData.keywords
+      };
+
+      await createCampaign(campaignPayload);
+      
+      // Reset form and show success
+      setCampaignData({
+        name: "",
+        description: "",
+        objective: "",
+        personaId: "",
+        budget: "",
+        currency: "USD",
+        startDate: "",
+        endDate: "",
+        channels: [],
+        contentType: [],
+        tone: "",
+        keywords: "",
+      });
+      
+      setCurrentStep(1);
+      alert('Campaign created successfully!');
+      
+    } catch (error) {
+      console.error('Campaign creation failed:', error);
+      alert('Failed to create campaign. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep1 = () => (
@@ -209,12 +278,18 @@ const CampaignBuilder = () => {
           Target Persona
         </label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {personas.map((persona) => (
+          {personasLoading ? (
+            <div className="col-span-full text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <p className="text-gray-400">Loading personas...</p>
+            </div>
+          ) : (
+            personaOptions.map((persona) => (
             <div
               key={persona.id}
-              onClick={() => handleInputChange("persona", persona.id)}
+              onClick={() => handleInputChange("personaId", persona.id)}
               className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                campaignData.persona === persona.id
+                campaignData.personaId === persona.id
                   ? "border-blue-500 bg-blue-500/10"
                   : "border-gray-700 bg-gray-800 hover:border-gray-600"
               }`}
@@ -224,7 +299,8 @@ const CampaignBuilder = () => {
                 <h3 className="text-white font-medium">{persona.label}</h3>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
 
@@ -336,7 +412,7 @@ const CampaignBuilder = () => {
           <div>
             <span className="text-gray-400">Persona:</span>
             <span className="text-white ml-2">
-              {personas.find((p) => p.id === campaignData.persona)?.label ||
+              {personaOptions.find((p) => p.id === campaignData.personaId)?.label ||
                 "Not set"}
             </span>
           </div>
@@ -466,9 +542,13 @@ const CampaignBuilder = () => {
               Next
             </button>
           ) : (
-            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+            <button 
+              onClick={handleSubmitCampaign}
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
+            >
               <Wand2 className="w-4 h-4" />
-              Generate Campaign
+              {isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
             </button>
           )}
         </div>

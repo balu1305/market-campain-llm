@@ -3,11 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./hooks/useAuth.jsx";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { Sidebar } from "./components/Sidebar";
 import Header from "./components/Header";
 import { PromoBar } from "./components/PromoBar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 import TargetPersonas from "./pages/TargetPersonas";
 import CampaignBuilder from "./pages/CampaignBuilder";
 import EmailCampaigns from "./pages/EmailCampaigns";
@@ -23,41 +26,56 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
       <BrowserRouter>
-        <div className="min-h-screen bg-[#0A0A0A]">
-          <PromoBar />
-          <div className="flex">
-            <Sidebar />
-            <div className="flex-1 flex flex-col">
-              <Header />
-              <main className="flex-1 p-6 bg-[#0A0A0A]">
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/personas" element={<TargetPersonas />} />
-                  <Route
-                    path="/campaign-builder"
-                    element={<CampaignBuilder />}
-                  />
-                  <Route path="/email-campaigns" element={<EmailCampaigns />} />
-                  <Route path="/social-media" element={<SocialMedia />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/content-editor" element={<ContentEditor />} />
-                  <Route path="/performance" element={<Performance />} />
-                  <Route path="/templates" element={<Templates />} />
-                  <Route path="/ab-tests" element={<ABTests />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </div>
-        </div>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-[#0A0A0A]">
+                  <PromoBar />
+                  <div className="flex">
+                    <Sidebar />
+                    <div className="flex-1 flex flex-col">
+                      <Header />
+                      <main className="flex-1 p-6 bg-[#0A0A0A]">
+                        <Routes>
+                          <Route
+                            path="/"
+                            element={<Navigate to="/dashboard" replace />}
+                          />
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/personas" element={<TargetPersonas />} />
+                          <Route
+                            path="/campaign-builder"
+                            element={<CampaignBuilder />}
+                          />
+                          <Route path="/email-campaigns" element={<EmailCampaigns />} />
+                          <Route path="/social-media" element={<SocialMedia />} />
+                          <Route path="/analytics" element={<Analytics />} />
+                          <Route path="/content-editor" element={<ContentEditor />} />
+                          <Route path="/performance" element={<Performance />} />
+                          <Route path="/templates" element={<Templates />} />
+                          <Route path="/ab-tests" element={<ABTests />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </AuthProvider>
+</QueryClientProvider>
 );
 
 export default App;

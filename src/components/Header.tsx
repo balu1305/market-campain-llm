@@ -5,9 +5,23 @@ import {
   BookOpen,
   GraduationCap,
   Plus,
+  LogOut,
+  User,
 } from "lucide-react";
+import { useAuth } from "../hooks/useAuth.jsx";
+import { Button } from "./ui/button";
+
 const Header = () => {
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <div className="h-16 flex items-center justify-end px-6 border-b border-gray-800">
       <div className="flex items-center gap-4 relative">
@@ -89,10 +103,24 @@ const Header = () => {
           Generate Campaign
         </button>
 
-        {/* Sign In button */}
-        <button className="px-4 py-1.5 text-gray-300 text-sm border border-gray-700 rounded-md hover:bg-gray-800 transition-colors">
-          Sign In
-        </button>
+        {/* User info and logout */}
+        {user && (
+          <div className="flex items-center gap-3 ml-2">
+            <div className="flex items-center gap-2 text-gray-300 text-sm">
+              <User size={16} />
+              <span>{user.email}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 flex items-center gap-1"
+            >
+              <LogOut size={14} />
+              Logout
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
